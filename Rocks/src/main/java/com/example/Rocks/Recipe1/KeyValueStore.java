@@ -2,6 +2,7 @@ package com.example.Rocks.Recipe1;
 
 import org.rocksdb.Status;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface KeyValueStore<K,V> {
@@ -19,7 +20,14 @@ public interface KeyValueStore<K,V> {
      * @param key
      * @return
      */
-    Optional<V> find(K key);
+    Optional<V> findSingleKey(K key);
+
+    /**
+     * Function to get multiple keys from a column family in one go
+     * @param Key
+     * @return
+     */
+    List<V> findMultipleKey(List<K> Key);
 
     /**
      * Delete method is used to delete a record from Rocks corresponding to a given key.

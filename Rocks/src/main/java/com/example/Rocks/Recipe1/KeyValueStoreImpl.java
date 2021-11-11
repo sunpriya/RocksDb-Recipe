@@ -1,10 +1,7 @@
 package com.example.Rocks.Recipe1;
 
 import lombok.extern.slf4j.Slf4j;
-import org.rocksdb.Options;
-import org.rocksdb.RocksDB;
-import org.rocksdb.RocksDBException;
-import org.rocksdb.Status;
+import org.rocksdb.*;
 import org.springframework.stereotype.Component;
 import org.springframework.util.SerializationUtils;
 
@@ -12,8 +9,12 @@ import javax.annotation.PostConstruct;
 import javax.inject.Inject;
 import java.io.File;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -23,7 +24,7 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
     RocksDB db;
 
     /**
-     * Opening of rocks databse.
+     * Opening of rocks database.
      */
     @Inject
     public  KeyValueStoreImpl () {
@@ -68,7 +69,7 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
     }
 
     @Override
-    public Optional<Object> find(String key) {
+    public Optional<Object> findSingleKey(String key) {
         Object value = null;
         try {
             byte[] bytes = db.get(key.getBytes());
@@ -87,6 +88,31 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
         }
         log.info("finding key '{}' returns '{}'", key, value);
         return value != null ? Optional.of(value) : Optional.empty();
+    }
+
+    @Override
+    public List<Object> findMultipleKey(List<String> keys) {
+        List<Object> retrievedList = new ArrayList<>();
+        try {
+            ReadOptions readOptions = new ReadOptions();
+            readOptions.setVerifyChecksums(true);
+            readOptions.setBackgroundPurgeOnIteratorCleanup(true);
+            List<byte[]> byteStringList = keys.stream().map(String::getBytes).collect(Collectors.toList());
+             retrievedList = db.multiGetAsList(readOptions, byteStringList).stream().map(it -> it!=null ? SerializationUtils.deserialize(it): "").collect(Collectors.toList());
+
+            return retrievedList;
+
+        } catch (RocksDBException e) {
+            log.error("Status of database multiget operation {}, {}", e.getStatus().getCode(), e.getStatus().getState());
+            log.error(
+                    "Error retrieving the entry with key: {}, cause: {}, message: {}",
+                    keys,
+                    e.getCause(),
+                    e.getMessage()
+            );
+        }
+
+        return retrievedList;
     }
 
     @Override
