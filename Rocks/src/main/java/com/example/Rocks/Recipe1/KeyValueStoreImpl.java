@@ -56,7 +56,7 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
     public synchronized boolean save(String key, Object value) {
         log.info("saving value '{}' with key '{}'", value, key);
         try {
-            db.put(key.getBytes(), SerializationUtils.serialize(value));
+            db.put(new WriteOptions().setSync(true), key.getBytes(), SerializationUtils.serialize(value));
         } catch (RocksDBException e) {
             /*
               Status object of rocks db lets you log the status code and sub code.
@@ -98,8 +98,8 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
             readOptions.setVerifyChecksums(true);
             readOptions.setBackgroundPurgeOnIteratorCleanup(true);
             List<byte[]> byteStringList = keys.stream().map(String::getBytes).collect(Collectors.toList());
-             retrievedList = db.multiGetAsList(readOptions, byteStringList).stream().map(it -> it!=null ? SerializationUtils.deserialize(it): "").collect(Collectors.toList());
-
+            retrievedList = db.multiGetAsList(readOptions, byteStringList).stream().map(it -> it!=null ? SerializationUtils.deserialize(it): "").collect(Collectors.toList());
+            log.info("Values found with keys {} are {}", keys, retrievedList);
             return retrievedList;
 
         } catch (RocksDBException e) {
@@ -131,6 +131,27 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
     @Override
     public void closeDb() {
         log.info("Closing the database and freeing the resources.");
-        db.close();
+        if (db != null) {
+            db.close();
+        }
+    }
+
+    @Override
+    public void writeBatch() {
+        try {
+            String key1 = "3";
+            String key2 = "4";
+            byte[] bytes = db.get(key1.getBytes());
+            if(bytes != null) {
+                WriteBatch batch = new WriteBatch();
+                batch.delete(key1.getBytes());
+                batch.put(key2.getBytes(), bytes);
+                db.write(new WriteOptions(), batch);
+            }
+            log.info("Write batch successful");
+        } catch (RocksDBException e) {
+            log.error("Batch write failed with status {}, exception {}", e.getStatus().getCode(), e.getMessage());
+        }
+
     }
 }

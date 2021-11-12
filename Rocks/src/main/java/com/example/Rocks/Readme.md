@@ -6,3 +6,5 @@ Basic operations covered in this section are:
 2. Operations like Save, find, delete from a DB.
 3. Logging of status of the database.
 4. Retrieve multiple keys in single operation
+5. Write batch operations to speed up the bul process. This is used for atomic updates, all or none operations will be performed with Write batch
+6. Making write operation synchronous.

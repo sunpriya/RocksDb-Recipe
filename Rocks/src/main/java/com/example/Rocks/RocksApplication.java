@@ -6,6 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ConfigurableApplicationContext;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @SpringBootApplication
 @Slf4j
 public class RocksApplication {
@@ -17,15 +20,16 @@ public class RocksApplication {
 		repo.save("1", "Person1");
 		repo.save("2", "Person2");
 		repo.save("3", "Person3");
-		System.out.println(repo.find("2").toString());
-		System.out.println(repo.find("4").toString());
+		repo.findSingleKey("2");
 		repo.save("4", "Person4");
 		repo.save("2", "Person5");
-		System.out.println(repo.find("2").toString());
-		System.out.println(repo.find("4").toString());
+		repo.findSingleKey("2");
+		repo.findSingleKey("4");
+		repo.findMultipleKey(List.of("1","2"));
 		repo.delete("2");
-		repo.delete("6");
-		repo.closeDb();
+		repo.writeBatch();
+		repo.findMultipleKey(List.of("3","4"));
+		//repo.closeDb();
 	}
 
 }

@@ -41,4 +41,9 @@ public interface KeyValueStore<K,V> {
      * @return Status object after closing the DB
      */
     void closeDb();
+
+    /**
+     * Used for atomic updates. All or none operations of the batch will be performed.
+     */
+    void writeBatch();
 }
