@@ -1,6 +1,6 @@
 package com.example.Rocks.Recipe1;
 
-import org.rocksdb.Status;
+import org.rocksdb.RocksDB;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,7 +12,7 @@ public interface KeyValueStore<K,V> {
      * @param value
      * @return
      */
-    boolean save(K key, V value);
+    boolean save(RocksDB db, K key, V value);
 
     /**
      * Find method is used to return a value from Rocks DB corresponding to a key if present.
@@ -20,30 +20,30 @@ public interface KeyValueStore<K,V> {
      * @param key
      * @return
      */
-    Optional<V> findSingleKey(K key);
+    Optional<V> findSingleKey(RocksDB db, K key);
 
     /**
      * Function to get multiple keys from a column family in one go
      * @param Key
      * @return
      */
-    List<V> findMultipleKey(List<K> Key);
+    List<V> findMultipleKey(RocksDB db, List<K> Key);
 
     /**
      * Delete method is used to delete a record from Rocks corresponding to a given key.
      * @param key
      * @return
      */
-    boolean delete(K key);
+    boolean delete(RocksDB db, K key);
 
     /**
      * This is used to close the database after performing all the operations.
      * @return Status object after closing the DB
      */
-    void closeDb();
+    void closeDb(RocksDB db);
 
     /**
      * Used for atomic updates. All or none operations of the batch will be performed.
      */
-    void writeBatch();
+    void writeBatch(RocksDB db);
 }
