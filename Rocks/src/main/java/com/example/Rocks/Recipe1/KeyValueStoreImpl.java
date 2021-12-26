@@ -44,7 +44,7 @@ public class KeyValueStoreImpl implements KeyValueStore<String, Object> {
             log.error("Status of database: {},{}", e.getStatus().getCode(), e.getStatus().getState());
 
             log.error(
-                    "Error retrieving the entry with key: {}, cause: {}, message: {}",
+                    "Error in retrieving the entry with key: {}, cause: {}, message: {}",
                     key,
                     e.getCause(),
                     e.getMessage()
